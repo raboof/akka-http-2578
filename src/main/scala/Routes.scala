@@ -1,5 +1,8 @@
 import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
+import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
+import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.sse.ServerSentEvent
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import akka.stream.scaladsl.Source
@@ -17,9 +20,10 @@ object Routes {
     handleExceptions(handlers) {
       get {
         path("example") {
-          complete(Source.fromFuture {
-            Future.failed(new TimeoutException())
-          })
+          onSuccess(Future.failed[Source[ServerSentEvent, akka.NotUsed]](new TimeoutException())
+          ) {
+            source => complete(source)
+          }
         }
       }
     }
